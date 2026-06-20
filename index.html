@@ -727,16 +727,15 @@
 
   function renderWater() {
     ctx.clearRect(0, 0, width, height);
-    const waterTop = height * 0.3;
 
-    const waterGradient = ctx.createLinearGradient(0, waterTop, 0, height);
-    waterGradient.addColorStop(0, 'rgba(79, 172, 254, 0)');
-    waterGradient.addColorStop(0.1, 'rgba(79, 172, 254, 0.05)');
-    waterGradient.addColorStop(0.3, 'rgba(79, 172, 254, 0.12)');
-    waterGradient.addColorStop(0.6, 'rgba(102, 126, 234, 0.2)');
-    waterGradient.addColorStop(1, 'rgba(118, 75, 162, 0.3)');
+    const waterGradient = ctx.createLinearGradient(0, 0, 0, height);
+    waterGradient.addColorStop(0, 'rgba(79, 172, 254, 0.02)');
+    waterGradient.addColorStop(0.3, 'rgba(79, 172, 254, 0.05)');
+    waterGradient.addColorStop(0.5, 'rgba(102, 126, 234, 0.1)');
+    waterGradient.addColorStop(0.75, 'rgba(102, 126, 234, 0.18)');
+    waterGradient.addColorStop(1, 'rgba(118, 75, 162, 0.28)');
     ctx.fillStyle = waterGradient;
-    ctx.fillRect(0, waterTop, width, height - waterTop);
+    ctx.fillRect(0, 0, width, height);
 
     const imgData = ctx.getImageData(0, 0, width, height);
     const data = imgData.data;
@@ -745,12 +744,11 @@
     const llen = Math.sqrt(lx * lx + ly * ly + lz * lz);
     const nlx = lx / llen, nly = ly / llen, nlz = lz / llen;
 
-    const amplitude = 4;
+    const amplitude = 5;
 
     for (let y = 0; y < rows; y++) {
       const yOff = y * cellSize;
-      const t = Math.max(0, Math.min(1, (yOff - waterTop) / (height - waterTop)));
-      if (t <= 0.005) continue;
+      const t = yOff / height;
 
       const yIdx = y * cols;
 
@@ -759,19 +757,19 @@
         const h = current[idx] * amplitude;
         const hAbs = Math.abs(h);
 
-        if (hAbs < 0.05 && t < 0.05) continue;
+        if (hAbs < 0.03 && t < 0.2) continue;
 
         let nx = 0, ny = 0;
         if (x > 0 && x < cols - 1 && y > 0 && y < rows - 1) {
           nx = (current[idx - 1] - current[idx + 1]) * amplitude;
           ny = (current[idx - cols] - current[idx + cols]) * amplitude;
         }
-        const nz = 2.5;
+        const nz = 3;
         const nlen = Math.sqrt(nx * nx + ny * ny + nz * nz);
         const nnx = nx / nlen, nny = ny / nlen, nnz = nz / nlen;
 
         let diffuse = nnx * nlx + nny * nly + nnz * nlz;
-        if (diffuse < 0.25) diffuse = 0.25;
+        if (diffuse < 0.2) diffuse = 0.2;
 
         let spec = 0;
         const hx = nlx, hy = nly, hz = nlz + 1;
@@ -779,11 +777,11 @@
         if (hlen > 0) {
           spec = nnx * (hx / hlen) + nny * (hy / hlen) + nnz * (hz / hlen);
           if (spec < 0) spec = 0;
-          spec = Math.pow(spec, 32) * 0.7;
+          spec = Math.pow(spec, 28) * 0.8;
         }
 
         const xOff = x * cellSize;
-        const alphaFactor = Math.min(1, t * 2.5);
+        const alphaFactor = 0.3 + t * 1.2;
         const baseR = 79 + (118 - 79) * t;
         const baseG = 172 + (75 - 172) * t;
         const baseB = 254 + (162 - 254) * t;
@@ -791,7 +789,7 @@
         const r = Math.min(255, Math.floor(baseR * diffuse + spec * 255));
         const g = Math.min(255, Math.floor(baseG * diffuse + spec * 255));
         const b = Math.min(255, Math.floor(baseB * diffuse + spec * 255));
-        const a = Math.min(255, Math.floor(hAbs * alphaFactor * 25 + spec * 180));
+        const a = Math.min(255, Math.floor(hAbs * alphaFactor * 20 + spec * 200));
 
         if (a <= 2) continue;
 
@@ -815,17 +813,17 @@
     ctx.putImageData(imgData, 0, 0);
 
     ctx.globalCompositeOperation = 'screen';
-    const hg1 = ctx.createRadialGradient(width * 0.25, height * 0.65, 0, width * 0.25, height * 0.65, width * 0.5);
-    hg1.addColorStop(0, 'rgba(0, 242, 254, 0.07)');
+    const hg1 = ctx.createRadialGradient(width * 0.2, height * 0.5, 0, width * 0.2, height * 0.5, width * 0.6);
+    hg1.addColorStop(0, 'rgba(0, 242, 254, 0.06)');
     hg1.addColorStop(1, 'rgba(0, 242, 254, 0)');
     ctx.fillStyle = hg1;
-    ctx.fillRect(0, waterTop, width, height - waterTop);
+    ctx.fillRect(0, 0, width, height);
 
-    const hg2 = ctx.createRadialGradient(width * 0.75, height * 0.85, 0, width * 0.75, height * 0.85, width * 0.4);
-    hg2.addColorStop(0, 'rgba(240, 147, 251, 0.05)');
+    const hg2 = ctx.createRadialGradient(width * 0.8, height * 0.75, 0, width * 0.8, height * 0.75, width * 0.5);
+    hg2.addColorStop(0, 'rgba(240, 147, 251, 0.04)');
     hg2.addColorStop(1, 'rgba(240, 147, 251, 0)');
     ctx.fillStyle = hg2;
-    ctx.fillRect(0, waterTop, width, height - waterTop);
+    ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'source-over';
   }
 
@@ -905,9 +903,11 @@
   animate();
 
   setTimeout(function() {
-    addDrop(width * 0.25, height * 0.6, 20, 40);
-    setTimeout(function() { addDrop(width * 0.5, height * 0.75, 18, 35); }, 150);
-    setTimeout(function() { addDrop(width * 0.75, height * 0.65, 16, 30); }, 300);
+    addDrop(width * 0.2, height * 0.2, 22, 45);
+    setTimeout(function() { addDrop(width * 0.6, height * 0.35, 20, 40); }, 150);
+    setTimeout(function() { addDrop(width * 0.4, height * 0.55, 18, 38); }, 300);
+    setTimeout(function() { addDrop(width * 0.75, height * 0.8, 16, 35); }, 450);
+    setTimeout(function() { addDrop(width * 0.15, height * 0.75, 15, 32); }, 600);
   }, 600);
 })();
 </script>
