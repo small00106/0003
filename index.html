@@ -13,161 +13,328 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.1) 0%, transparent 60%);
+    animation: bgFloat 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes bgFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(2%, -2%) rotate(1deg); }
+    66% { transform: translate(-2%, 2%) rotate(-1deg); }
+  }
+
+  .floating-shapes {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.4;
+    filter: blur(60px);
+    animation: floatShape 15s ease-in-out infinite;
+  }
+
+  .shape-1 {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    top: 5%;
+    left: 5%;
+    animation-delay: 0s;
+  }
+
+  .shape-2 {
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    bottom: 10%;
+    right: 8%;
+    animation-delay: -5s;
+  }
+
+  .shape-3 {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    top: 50%;
+    right: 15%;
+    animation-delay: -10s;
+  }
+
+  @keyframes floatShape {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -30px) scale(1.1); }
   }
 
   .container {
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-    padding: 60px 50px;
-    max-width: 900px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    box-shadow:
+      0 25px 80px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 70px 60px;
+    max-width: 1100px;
     width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 70px;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #f093fb, #4facfe);
+    border-radius: 2px;
+    margin: 24px auto 0;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 6px 18px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(240, 147, 251, 0.3));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    color: #c4c8ff;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
   }
 
   .page-title {
-    text-align: center;
-    color: #333;
-    font-size: 32px;
-    margin-bottom: 10px;
-    font-weight: 700;
+    color: #ffffff;
+    font-size: 44px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #c4c8ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
   }
 
   .page-subtitle {
-    text-align: center;
-    color: #888;
-    font-size: 16px;
-    margin-bottom: 60px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 17px;
+    line-height: 1.7;
+    max-width: 560px;
+    margin: 0 auto;
   }
 
   .section {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    gap: 40px;
   }
 
   .demo-card {
-    background: #f8f9fa;
-    border-radius: 16px;
-    padding: 40px 30px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 45px 35px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: transform 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .demo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--card-accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   .demo-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .demo-card:hover::before {
+    opacity: 1;
+  }
+
+  .demo-card.loader-card {
+    --card-accent: #667eea;
+  }
+
+  .demo-card.ripple-card {
+    --card-accent: #f093fb;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    width: 100%;
   }
 
   .demo-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    margin-bottom: 20px;
+    font-size: 26px;
     color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   }
 
-  .demo-card:nth-child(1) .demo-icon {
+  .demo-card.loader-card .demo-icon {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 
-  .demo-card:nth-child(2) .demo-icon {
+  .demo-card.ripple-card .demo-icon {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .card-titles {
+    flex: 1;
   }
 
   .demo-title {
     font-size: 22px;
-    color: #333;
-    margin-bottom: 8px;
-    font-weight: 600;
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .demo-tag {
+    display: inline-block;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
   }
 
   .demo-desc {
     font-size: 14px;
-    color: #888;
-    text-align: center;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: left;
     margin-bottom: 35px;
-    line-height: 1.6;
+    line-height: 1.7;
+    width: 100%;
   }
 
   .demo-area {
     width: 100%;
-    min-height: 200px;
+    min-height: 280px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
-    border-radius: 12px;
-    border: 2px dashed #e0e0e0;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
   }
 
-  .loader-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-  }
-
-  .loader {
-    width: 70px;
-    height: 70px;
-    border: 5px solid #e5e7eb;
-    border-top-color: #667eea;
-    border-right-color: #764ba2;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .loader-text {
-    color: #888;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  .demo-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
   }
 
   .loader-variants {
     display: flex;
-    gap: 40px;
+    gap: 50px;
     flex-wrap: wrap;
     justify-content: center;
+    position: relative;
+    z-index: 1;
   }
 
   .loader-variant {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 18px;
+  }
+
+  .loader,
+  .loader-2,
+  .loader-3 {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+  }
+
+  .loader {
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #667eea;
+    border-right-color: #764ba2;
+    animation: spin 1s linear infinite;
   }
 
   .loader-2 {
-    width: 50px;
-    height: 50px;
-    border: 4px solid transparent;
+    border: 5px solid transparent;
     border-top-color: #f093fb;
     border-bottom-color: #f5576c;
     border-left-color: #f5576c;
-    border-radius: 50%;
     animation: spin 0.8s ease-in-out infinite;
   }
 
   .loader-3 {
-    width: 50px;
-    height: 50px;
     position: relative;
   }
 
@@ -176,7 +343,7 @@
     content: '';
     position: absolute;
     border-radius: 50%;
-    border: 4px solid transparent;
+    border: 5px solid transparent;
   }
 
   .loader-3::before {
@@ -184,113 +351,198 @@
     left: 0;
     right: 0;
     bottom: 0;
-    border-top-color: #667eea;
+    border-top-color: #4facfe;
     animation: spin 1s linear infinite;
   }
 
   .loader-3::after {
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    border-bottom-color: #764ba2;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border-bottom-color: #00f2fe;
     animation: spin 0.6s linear infinite reverse;
   }
 
-  .ripple-btn {
-    position: relative;
-    padding: 18px 50px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #ffffff;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    overflow: hidden;
-    outline: none;
-    transition: transform 0.15s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
-    letter-spacing: 0.5px;
-  }
-
-  .ripple-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(245, 87, 108, 0.5);
-  }
-
-  .ripple-btn:active {
-    transform: translateY(0);
-  }
-
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    transform: scale(0);
-    animation: ripple-effect 0.7s ease-out;
-    pointer-events: none;
-  }
-
-  @keyframes ripple-effect {
+  @keyframes spin {
     to {
-      transform: scale(4);
-      opacity: 0;
+      transform: rotate(360deg);
     }
+  }
+
+  .loader-text {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
   }
 
   .btn-variants {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 22px;
     align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ripple-btn {
+    position: relative;
+    padding: 18px 56px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+    letter-spacing: 0.5px;
+    overflow: visible;
+    min-width: 220px;
+  }
+
+  .ripple-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1.5px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .ripple-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(245, 87, 108, 0.5);
+  }
+
+  .ripple-btn:active {
+    transform: translateY(0) scale(0.98);
   }
 
   .ripple-btn.blue {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
   }
 
   .ripple-btn.blue:hover {
-    box-shadow: 0 6px 25px rgba(0, 242, 254, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 242, 254, 0.5);
   }
 
   .ripple-btn.green {
     background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    box-shadow: 0 4px 15px rgba(56, 249, 215, 0.4);
+    box-shadow: 0 6px 20px rgba(56, 249, 215, 0.4);
   }
 
   .ripple-btn.green:hover {
-    box-shadow: 0 6px 25px rgba(56, 249, 215, 0.5);
+    box-shadow: 0 10px 30px rgba(56, 249, 215, 0.5);
+  }
+
+  .ripple-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-effect 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  @keyframes ripple-effect {
+    0% {
+      transform: scale(0);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(30);
+      opacity: 0;
+    }
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .footer-text {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+
+  .footer-text span {
+    background: linear-gradient(90deg, #667eea, #f093fb, #4facfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
   }
 
   @media (max-width: 768px) {
     .container {
-      padding: 40px 25px;
+      padding: 45px 25px;
+    }
+    .page-title {
+      font-size: 30px;
     }
     .section {
       grid-template-columns: 1fr;
-      gap: 40px;
-    }
-    .page-title {
-      font-size: 26px;
+      gap: 30px;
     }
     .loader-variants {
-      gap: 25px;
+      gap: 30px;
+    }
+    .ripple-btn {
+      min-width: 180px;
+      padding: 16px 40px;
     }
   }
 </style>
 </head>
 <body>
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <div class="ripple-container" id="rippleContainer"></div>
+
   <div class="container">
-    <h1 class="page-title">CSS 效果演示</h1>
-    <p class="page-subtitle">旋转加载器 & 涟漪扩散按钮 · 纯 CSS 实现</p>
+    <div class="header">
+      <span class="badge">✨ Pure CSS Magic</span>
+      <h1 class="page-title">CSS 动画效果展示</h1>
+      <p class="page-subtitle">探索纯 CSS 与少量 JavaScript 创造的精美交互效果，旋转加载器与全屏涟漪扩散按钮</p>
+    </div>
 
     <div class="section">
-      <div class="demo-card">
-        <div class="demo-icon">⏳</div>
-        <h2 class="demo-title">旋转加载器</h2>
-        <p class="demo-desc">利用 CSS @keyframes 实现多种旋转动画效果，常用于数据加载等待场景。</p>
+      <div class="demo-card loader-card">
+        <div class="card-header">
+          <div class="demo-icon">⏳</div>
+          <div class="card-titles">
+            <h2 class="demo-title">旋转加载器</h2>
+            <span class="demo-tag">CSS @keyframes</span>
+          </div>
+        </div>
+        <p class="demo-desc">通过 CSS 关键帧动画实现流畅的旋转加载效果，适用于数据请求、页面加载等等待场景。提供三种不同风格的设计。</p>
         <div class="demo-area">
           <div class="loader-variants">
             <div class="loader-variant">
@@ -309,10 +561,15 @@
         </div>
       </div>
 
-      <div class="demo-card">
-        <div class="demo-icon">✨</div>
-        <h2 class="demo-title">涟漪按钮</h2>
-        <p class="demo-desc">点击按钮时从中心向外扩散出圆形波纹，配合 JS 动态生成涟漪元素。</p>
+      <div class="demo-card ripple-card">
+        <div class="card-header">
+          <div class="demo-icon">✨</div>
+          <div class="card-titles">
+            <h2 class="demo-title">涟漪按钮</h2>
+            <span class="demo-tag">JS + CSS Animation</span>
+          </div>
+        </div>
+        <p class="demo-desc">点击按钮时，从按钮中心位置向外扩散出全屏范围的圆形波纹，配合渐变色彩营造沉浸式交互体验。</p>
         <div class="demo-area">
           <div class="btn-variants">
             <button class="ripple-btn">点击我 💕</button>
@@ -322,20 +579,44 @@
         </div>
       </div>
     </div>
+
+    <div class="footer">
+      <p class="footer-text">Crafted with <span>♥ CSS & JavaScript</span> — 刷新页面重新体验</p>
+    </div>
   </div>
 
 <script>
+  const rippleContainer = document.getElementById('rippleContainer');
+
+  const colorMap = {
+    default: ['rgba(240, 147, 251, 0.5)', 'rgba(245, 87, 108, 0.3)'],
+    blue: ['rgba(79, 172, 254, 0.5)', 'rgba(0, 242, 254, 0.3)'],
+    green: ['rgba(67, 233, 123, 0.5)', 'rgba(56, 249, 215, 0.3)']
+  };
+
   document.querySelectorAll('.ripple-btn').forEach(button => {
     button.addEventListener('click', function(e) {
       const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const ripple = document.createElement('span');
-      ripple.className = 'ripple';
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = (rect.width / 2 - size / 2) + 'px';
-      ripple.style.top = (rect.height / 2 - size / 2) + 'px';
-      this.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 700);
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      let colors = colorMap.default;
+      if (this.classList.contains('blue')) colors = colorMap.blue;
+      if (this.classList.contains('green')) colors = colorMap.green;
+
+      for (let i = 0; i < 2; i++) {
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        const size = 60;
+        ripple.style.width = size + 'px';
+        ripple.style.height = size + 'px';
+        ripple.style.left = (centerX - size / 2) + 'px';
+        ripple.style.top = (centerY - size / 2) + 'px';
+        ripple.style.background = `radial-gradient(circle, ${colors[0]} 0%, ${colors[1]} 50%, transparent 70%)`;
+        ripple.style.animationDelay = (i * 0.15) + 's';
+        rippleContainer.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 1600);
+      }
     });
   });
 </script>
