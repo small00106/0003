@@ -455,6 +455,16 @@
     overflow: hidden;
   }
 
+  .water-canvas {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
   .ripple {
     position: absolute;
     border-radius: 50%;
@@ -525,6 +535,7 @@
   </div>
 
   <div class="ripple-container" id="rippleContainer"></div>
+  <canvas class="water-canvas" id="waterCanvas"></canvas>
 
   <div class="container">
     <div class="header">
@@ -619,6 +630,240 @@
       }
     });
   });
+</script>
+
+<script>
+(function() {
+  const canvas = document.getElementById('waterCanvas');
+  const ctx = canvas.getContext('2d');
+
+  let width, height;
+  let cols, rows;
+  const cellSize = 5;
+  const damping = 0.985;
+
+  let current, previous;
+
+  function initBuffers() {
+    cols = Math.ceil(width / cellSize);
+    rows = Math.ceil(height / cellSize);
+    const size = cols * rows;
+    current = new Float32Array(size);
+    previous = new Float32Array(size);
+  }
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    initBuffers();
+  }
+
+  function addDrop(x, y, strength, radius) {
+    const gx = Math.floor(x / cellSize);
+    const gy = Math.floor(y / cellSize);
+    const r = Math.ceil(radius / cellSize);
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        const px = gx + dx;
+        const py = gy + dy;
+        if (px < 0 || px >= cols || py < 0 || py >= rows) continue;
+        const distSq = dx * dx + dy * dy;
+        if (distSq <= r * r) {
+          const factor = 1 - Math.sqrt(distSq) / r;
+          current[py * cols + px] -= strength * factor * factor;
+        }
+      }
+    }
+  }
+
+  function updateWater() {
+    for (let y = 1; y < rows - 1; y++) {
+      const yOffset = y * cols;
+      for (let x = 1; x < cols - 1; x++) {
+        const idx = yOffset + x;
+        const neighbors =
+          current[idx - cols] +
+          current[idx + cols] +
+          current[idx - 1] +
+          current[idx + 1];
+        previous[idx] = (neighbors * 0.5 - previous[idx]) * damping;
+      }
+    }
+    const temp = current;
+    current = previous;
+    previous = temp;
+  }
+
+  function renderWater() {
+    ctx.clearRect(0, 0, width, height);
+    const waterTop = height * 0.4;
+
+    const waterGradient = ctx.createLinearGradient(0, waterTop, 0, height);
+    waterGradient.addColorStop(0, 'rgba(79, 172, 254, 0)');
+    waterGradient.addColorStop(0.1, 'rgba(79, 172, 254, 0.08)');
+    waterGradient.addColorStop(0.5, 'rgba(102, 126, 234, 0.18)');
+    waterGradient.addColorStop(1, 'rgba(118, 75, 162, 0.28)');
+    ctx.fillStyle = waterGradient;
+    ctx.fillRect(0, waterTop, width, height - waterTop);
+
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const data = imgData.data;
+
+    const lx = -0.4, ly = -0.6, lz = 0.7;
+    const llen = Math.sqrt(lx * lx + ly * ly + lz * lz);
+    const nlx = lx / llen, nly = ly / llen, nlz = lz / llen;
+
+    for (let y = 0; y < rows; y++) {
+      const yOff = y * cellSize;
+      const t = Math.max(0, Math.min(1, (yOff - waterTop) / (height - waterTop)));
+      if (t <= 0) continue;
+
+      for (let x = 0; x < cols; x++) {
+        const idx = y * cols + x;
+        const h = current[idx];
+        const hAbs = Math.abs(h);
+        if (hAbs < 0.5 && t < 0.05) continue;
+
+        let nx = 0, ny = 0;
+        if (x > 0 && x < cols - 1 && y > 0 && y < rows - 1) {
+          nx = current[idx - 1] - current[idx + 1];
+          ny = current[idx - cols] - current[idx + cols];
+        }
+        const nz = 1.5;
+        const nlen = Math.sqrt(nx * nx + ny * ny + nz * nz);
+        const nnx = nx / nlen, nny = ny / nlen, nnz = nz / nlen;
+
+        let diffuse = nnx * nlx + nny * nly + nnz * nlz;
+        if (diffuse < 0) diffuse = 0;
+
+        let spec = 0;
+        const hx = nlx, hy = nly, hz = nlz + 1;
+        const hlen = Math.sqrt(hx * hx + hy * hy + hz * hz);
+        if (hlen > 0) {
+          spec = nnx * (hx / hlen) + nny * (hy / hlen) + nnz * (hz / hlen);
+          if (spec < 0) spec = 0;
+          spec = Math.pow(spec, 20);
+        }
+
+        const xOff = x * cellSize;
+        const alphaFactor = Math.min(1, t * 1.5);
+        const baseR = 79 + (118 - 79) * t;
+        const baseG = 172 + (75 - 172) * t;
+        const baseB = 254 + (162 - 254) * t;
+
+        const r = Math.min(255, Math.floor(baseR * (0.65 + diffuse * 0.35) + spec * 200));
+        const g = Math.min(255, Math.floor(baseG * (0.65 + diffuse * 0.35) + spec * 220));
+        const b = Math.min(255, Math.floor(baseB * (0.85 + diffuse * 0.15) + spec * 200));
+        const a = Math.min(255, Math.floor(hAbs * alphaFactor * 50 + spec * 100));
+
+        if (a <= 0) continue;
+
+        for (let sy = 0; sy < cellSize && yOff + sy < height; sy++) {
+          for (let sx = 0; sx < cellSize && xOff + sx < width; sx++) {
+            const pIdx = ((yOff + sy) * width + (xOff + sx)) * 4;
+            const ea = data[pIdx + 3] / 255;
+            const na = a / 255;
+            const ta = na + ea * (1 - na);
+            if (ta > 0 && na > 0) {
+              data[pIdx] = Math.floor((r * na + data[pIdx] * ea * (1 - na)) / ta);
+              data[pIdx + 1] = Math.floor((g * na + data[pIdx + 1] * ea * (1 - na)) / ta);
+              data[pIdx + 2] = Math.floor((b * na + data[pIdx + 2] * ea * (1 - na)) / ta);
+              data[pIdx + 3] = Math.floor(ta * 255);
+            }
+          }
+        }
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+
+    ctx.globalCompositeOperation = 'screen';
+    const hg1 = ctx.createRadialGradient(width * 0.3, height * 0.7, 0, width * 0.3, height * 0.7, width * 0.45);
+    hg1.addColorStop(0, 'rgba(0, 242, 254, 0.1)');
+    hg1.addColorStop(1, 'rgba(0, 242, 254, 0)');
+    ctx.fillStyle = hg1;
+    ctx.fillRect(0, waterTop, width, height - waterTop);
+
+    const hg2 = ctx.createRadialGradient(width * 0.75, height * 0.85, 0, width * 0.75, height * 0.85, width * 0.4);
+    hg2.addColorStop(0, 'rgba(240, 147, 251, 0.06)');
+    hg2.addColorStop(1, 'rgba(240, 147, 251, 0)');
+    ctx.fillStyle = hg2;
+    ctx.fillRect(0, waterTop, width, height - waterTop);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function animate() {
+    updateWater();
+    renderWater();
+    requestAnimationFrame(animate);
+  }
+
+  let lastMouseX = 0, lastMouseY = 0;
+
+  function handleMouseMove(e) {
+    const x = e.clientX;
+    const y = e.clientY;
+    const dx = x - lastMouseX;
+    const dy = y - lastMouseY;
+    const speed = Math.sqrt(dx * dx + dy * dy);
+
+    if (speed > 6) {
+      const steps = Math.min(4, Math.floor(speed / 8));
+      for (let i = 0; i <= steps; i++) {
+        const tt = i / Math.max(1, steps);
+        const ix = lastMouseX + dx * tt;
+        const iy = lastMouseY + dy * tt;
+        const strength = Math.min(100, 35 + speed * 0.6);
+        const radius = Math.min(60, 25 + speed * 0.35);
+        addDrop(ix, iy, strength, radius);
+      }
+    }
+
+    lastMouseX = x;
+    lastMouseY = y;
+  }
+
+  function handleClick(e) {
+    addDrop(e.clientX, e.clientY, 200, 100);
+    setTimeout(function() { addDrop(e.clientX, e.clientY, 100, 70); }, 80);
+    setTimeout(function() { addDrop(e.clientX, e.clientY, 50, 45); }, 180);
+  }
+
+  function handleTouchMove(e) {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+    }
+  }
+
+  function handleTouchStart(e) {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleClick({ clientX: touch.clientX, clientY: touch.clientY });
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('click', handleClick);
+  document.addEventListener('touchmove', handleTouchMove, { passive: true });
+  document.addEventListener('touchstart', handleTouchStart, { passive: true });
+
+  resize();
+  animate();
+
+  setTimeout(function() {
+    addDrop(width * 0.3, height * 0.7, 150, 80);
+    setTimeout(function() { addDrop(width * 0.55, height * 0.85, 120, 70); }, 200);
+    setTimeout(function() { addDrop(width * 0.8, height * 0.72, 100, 60); }, 400);
+  }, 500);
+})();
 </script>
 </body>
 </html>
